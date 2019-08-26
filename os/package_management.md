@@ -84,6 +84,26 @@ aptitude: 同时包含文本模式界面和图形界面
 * Synaptic(新立得) 图形化软件
 * GDebi 图形化安装本地.deb 包 `$ sudo apt install gdebi`
 
+#### Ubuntu 镜像使用帮助
+
+Ubuntu 的软件源配置文件是 `/etc/apt/sources.list`. 将系统自带的该文件做个备份, 将该文件替换为下面内容, 即可使用 TUNA 的软件源镜像.
+
+```sh
+# 默认注释了源码镜像以提高 apt update 速度, 如有需要可自行取消注释
+deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ bionic main restricted universe multiverse
+# deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ bionic main restricted universe multiverse
+deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ bionic-updates main restricted universe multiverse
+# deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ bionic-updates main restricted universe multiverse
+deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ bionic-backports main restricted universe multiverse
+# deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ bionic-backports main restricted universe multiverse
+deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ bionic-security main restricted universe multiverse
+# deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ bionic-security main restricted universe multiverse
+
+# 预发布软件源, 不建议启用
+# deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ bionic-proposed main restricted universe multiverse
+# deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ bionic-proposed main restricted universe multiverse
+```
+
 ### Red Hat Package Manager
 
 #### 简介
@@ -237,6 +257,60 @@ rpm –-rebuilddb # 重建直接重建, 覆盖原有的数据库
 * preuninstall: 卸载前脚本
 * postuninstall: 卸载后脚本
 
+#### CentOS 镜像使用帮助
+
+首先备份 CentOS-Base.repo `sudo mv /etc/yum.repos.d/CentOS-Base.repo /etc/yum.repos.d/CentOS-Base.repo.bak`
+
+之后启用 TUNA 软件仓库， 将以下内容写入 `/etc/yum.repos.d/CentOS-Base.repo`
+
+```
+# CentOS-Base.repo
+#
+# The mirror system uses the connecting IP address of the client and the
+# update status of each mirror to pick mirrors that are updated to and
+# geographically close to the client.  You should use this for CentOS updates
+# unless you are manually picking other mirrors.
+#
+# If the mirrorlist= does not work for you, as a fall back you can try the
+# remarked out baseurl= line instead.
+#
+#
+
+[base]
+name=CentOS-$releasever - Base
+baseurl=https://mirrors.tuna.tsinghua.edu.cn/centos/$releasever/os/$basearch/
+#mirrorlist=http://mirrorlist.centos.org/?release=$releasever&arch=$basearch&repo=os
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7
+
+#released updates
+[updates]
+name=CentOS-$releasever - Updates
+baseurl=https://mirrors.tuna.tsinghua.edu.cn/centos/$releasever/updates/$basearch/
+#mirrorlist=http://mirrorlist.centos.org/?release=$releasever&arch=$basearch&repo=updates
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7
+
+#additional packages that may be useful
+[extras]
+name=CentOS-$releasever - Extras
+baseurl=https://mirrors.tuna.tsinghua.edu.cn/centos/$releasever/extras/$basearch/
+#mirrorlist=http://mirrorlist.centos.org/?release=$releasever&arch=$basearch&repo=extras
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7
+
+#additional packages that extend functionality of existing packages
+[centosplus]
+name=CentOS-$releasever - Plus
+baseurl=https://mirrors.tuna.tsinghua.edu.cn/centos/$releasever/centosplus/$basearch/
+#mirrorlist=http://mirrorlist.centos.org/?release=$releasever&arch=$basearch&repo=centosplus
+gpgcheck=1
+enabled=0
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7
+```
+
+更新软件包缓存 `sudo yum makecache`
+
 ## macOS
 
 ### Homebrew
@@ -348,6 +422,42 @@ Editing /usr/local/Homebrew/Library/Taps/homebrew/homebrew-cask/Casks/foo.rb
 * brew cleanup 清理所有的过时软件
 * brew unistall <formula> 卸载指定软件
 * brew unistall <fromula> --force 彻底卸载指定软件, 包括旧版本
+
+Brew 更新软件很简单, 但是 brew cask 就没这么简单了.
+
+```sh
+# 安装 brew-cask-upgrade
+brew tap buo/cask-upgrade
+```
+
+* brew cu 更新所有过时应用
+* brew cu [CASK] 更新指定应用
+
+#### Homebrew 镜像使用帮助
+
+替换现有上游:
+
+```sh
+git -C "$(brew --repo)" remote set-url origin https://mirrors.tuna.tsinghua.edu.cn/git/homebrew/brew.git
+
+git -C "$(brew --repo homebrew/core)" remote set-url origin https://mirrors.tuna.tsinghua.edu.cn/git/homebrew/homebrew-core.git
+
+git -C "$(brew --repo homebrew/cask)" remote set-url origin https://mirrors.tuna.tsinghua.edu.cn/git/homebrew/homebrew-cask.git
+
+brew update
+```
+
+复原:
+
+```sh
+git -C "$(brew --repo)" remote set-url origin https://github.com/Homebrew/brew.git
+
+git -C "$(brew --repo homebrew/core)" remote set-url origin https://github.com/Homebrew/homebrew-core.git
+
+git -C "$(brew --repo homebrew/cask)" remote set-url origin https://github.com/Homebrew/homebrew-cask.git
+
+brew update
+```
 
 ### Windows
 
